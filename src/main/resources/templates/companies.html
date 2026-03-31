@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Companies')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container page-container">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <div class="page-header">
+        <h1>Companies <span class="count-badge" th:text="${companies.size()}">0</span></h1>
+    </div>
+
+    <form th:action="@{/companies}" method="get" class="filter-bar">
+        <input type="text" name="search" placeholder="Search by name or industry…"
+               th:value="${search}" class="filter-input"/>
+        <button type="submit" class="btn btn-primary">Search</button>
+        <a th:href="@{/companies}" class="btn btn-outline">Reset</a>
+    </form>
+
+    <!-- Industry pills -->
+    <div class="pill-row mb-2">
+        <span class="pill pill-label">Industries:</span>
+        <a th:each="ind : ${industries}"
+           th:href="@{/companies(search=${ind})}"
+           th:text="${ind}"
+           class="pill">ind</a>
+    </div>
+
+    <div th:if="${companies.isEmpty()}" class="empty-state">
+        <p>😕 No companies found.</p>
+    </div>
+
+    <div class="company-grid">
+        <div th:each="c : ${companies}" class="company-card">
+            <div class="cc-top">
+                <div class="company-logo-placeholder lg" th:text="${c.name.substring(0,1)}">C</div>
+                <div>
+                    <h3 th:text="${c.name}">Name</h3>
+                    <p class="cc-industry" th:text="${c.industry}">Industry</p>
+                </div>
+            </div>
+            <p class="cc-location" th:if="${c.location != null}">📍 <span th:text="${c.location}">Loc</span></p>
+            <p class="cc-desc" th:if="${c.description != null}"
+               th:text="${#strings.abbreviate(c.description, 120)}">Desc</p>
+            <div class="cc-footer">
+                <span class="tag tag-active" th:text="${c.activeJobCount} + ' open roles'">0 roles</span>
+                <a th:if="${c.website != null}"
+                   th:href="${c.website}" target="_blank" class="btn btn-outline btn-sm">Website ↗</a>
+                <a th:href="@{/jobs(search=${c.name})}" class="btn btn-outline btn-sm">View Jobs →</a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

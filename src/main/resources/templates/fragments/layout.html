@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<!-- ══════════════════════════════════════════════════
+     FRAGMENT: head  (th:replace="~{fragments/layout :: head(title)}")
+     ══════════════════════════════════════════════════ -->
+<head th:fragment="head(pageTitle)">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${pageTitle} + ' — DevHunt'">DevHunt</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+
+<!-- ══════════════════════════════════════════════════
+     FRAGMENT: navbar
+     ══════════════════════════════════════════════════ -->
+<nav th:fragment="navbar" class="navbar">
+    <div class="nav-inner">
+        <a th:href="@{/}" class="nav-logo">
+            <span class="logo-icon">🚀</span> DevHunt
+        </a>
+        <ul class="nav-links">
+            <li><a th:href="@{/jobs}">Browse Jobs</a></li>
+            <li><a th:href="@{/companies}">Companies</a></li>
+            <li><a th:href="@{/admin/applications}">Applications</a></li>
+        </ul>
+        <form th:action="@{/jobs}" method="get" class="nav-search">
+            <input type="text" name="search" placeholder="Search jobs…" autocomplete="off"/>
+            <button type="submit">🔍</button>
+        </form>
+    </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════
+     FRAGMENT: flash messages
+     ══════════════════════════════════════════════════ -->
+<div th:fragment="flash">
+    <div th:if="${successMsg}" class="alert alert-success" th:text="${successMsg}"></div>
+    <div th:if="${errorMsg}"   class="alert alert-error"   th:text="${errorMsg}"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     FRAGMENT: footer
+     ══════════════════════════════════════════════════ -->
+<footer th:fragment="footer" class="footer">
+    <div class="footer-inner">
+        <span>© 2025 DevHunt — Remote Jobs for Developers</span>
+        <span>Built with Spring Boot 3 · Thymeleaf · H2</span>
+        <a th:href="@{/h2-console}" target="_blank">H2 Console</a>
+    </div>
+</footer>
+
+</html>

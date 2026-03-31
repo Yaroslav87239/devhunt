@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Home')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main>
+    <!-- ── Hero ─────────────────────────────────────────────── -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Find Your Next <span class="accent">Remote Dev Job</span></h1>
+            <p>Curated remote positions from top tech companies, updated daily.</p>
+            <form th:action="@{/jobs}" method="get" class="hero-search">
+                <input type="text" name="search" placeholder="Job title, skill, company…" autocomplete="off"/>
+                <button type="submit" class="btn btn-primary">Search Jobs</button>
+            </form>
+            <div class="hero-stats">
+                <span><strong th:text="${activeCount}">0</strong> active jobs</span>
+                <span><strong th:text="${companies.size()}">0</strong> companies</span>
+                <span><strong th:text="${pendingApps}">0</strong> pending reviews</span>
+            </div>
+        </div>
+    </section>
+
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <!-- ── Category pills ───────────────────────────────────── -->
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">Browse by Category</h2>
+            <div class="pill-row">
+                <a th:href="@{/jobs}" class="pill pill-all">All</a>
+                <a th:each="cat : ${categories}"
+                   th:href="@{/jobs(category=${cat})}"
+                   th:text="${cat}"
+                   class="pill">cat</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Latest Jobs ───────────────────────────────────────── -->
+    <section class="section bg-soft">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Latest Openings</h2>
+                <a th:href="@{/jobs}" class="btn btn-outline">View all →</a>
+            </div>
+            <div class="job-grid">
+                <a th:each="job, iter : ${activeJobs}"
+                   th:if="${iter.index < 6}"
+                   th:href="@{/jobs/{id}(id=${job.id})}"
+                   class="job-card">
+                    <div class="job-card-top">
+                        <div class="company-logo-wrap">
+                            <img th:if="${job.companyLogoUrl != null and !job.companyLogoUrl.isEmpty()}"
+                                 th:src="${job.companyLogoUrl}" th:alt="${job.companyName}" class="company-logo"/>
+                            <div th:unless="${job.companyLogoUrl != null and !job.companyLogoUrl.isEmpty()}"
+                                 class="company-logo-placeholder"
+                                 th:text="${job.companyName.substring(0,1)}">C</div>
+                        </div>
+                        <div>
+                            <p class="job-company" th:text="${job.companyName}">Company</p>
+                            <p class="job-location" th:text="${job.companyLocation}">Location</p>
+                        </div>
+                    </div>
+                    <h3 class="job-title" th:text="${job.title}">Title</h3>
+                    <div class="job-tags">
+                        <span class="tag tag-type" th:text="${job.jobType.label}">Full-time</span>
+                        <span th:if="${job.remote}" class="tag tag-remote">🌍 Remote</span>
+                        <span class="tag tag-cat" th:text="${job.category}">Category</span>
+                    </div>
+                    <p class="job-salary" th:text="${job.salaryRange}">Salary</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Top Companies ────────────────────────────────────── -->
+    <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Hiring Now</h2>
+                <a th:href="@{/companies}" class="btn btn-outline">All companies →</a>
+            </div>
+            <div class="company-row">
+                <a th:each="c, iter : ${companies}"
+                   th:if="${iter.index < 8}"
+                   th:href="@{/companies}"
+                   class="company-chip">
+                    <span th:text="${c.name}">Company</span>
+                    <span class="chip-count" th:text="${c.activeJobCount} + ' jobs'">0 jobs</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Admin quick actions ───────────────────────────────── -->
+    <section class="section bg-soft">
+        <div class="container">
+            <h2 class="section-title">🛠 Admin Panel</h2>
+            <div class="admin-actions">
+                <form th:action="@{/admin/parser/sync}" method="post">
+                    <input type="hidden" name="category" value="software-dev"/>
+                    <button type="submit" class="btn btn-primary">⟳ Sync Remote Jobs (software-dev)</button>
+                </form>
+                <form th:action="@{/admin/parser/sync}" method="post">
+                    <input type="hidden" name="category" value="devops-sysadmin"/>
+                    <button type="submit" class="btn btn-outline">⟳ Sync DevOps Jobs</button>
+                </form>
+                <a th:href="@{/admin/applications}" class="btn btn-outline">📋 Review Applications</a>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

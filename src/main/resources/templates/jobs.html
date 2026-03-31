@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Browse Jobs')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container page-container">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <div class="page-header">
+        <h1>Browse Jobs <span class="count-badge" th:text="${jobs.size()}">0</span></h1>
+    </div>
+
+    <!-- ── Filters ──────────────────────────────────────────── -->
+    <form th:action="@{/jobs}" method="get" class="filter-bar">
+        <input type="text" name="search" placeholder="Search title, skill, company…"
+               th:value="${search}" class="filter-input"/>
+        <select name="category" class="filter-select">
+            <option value="">All categories</option>
+            <option th:each="cat : ${categories}"
+                    th:value="${cat}"
+                    th:text="${cat}"
+                    th:selected="${cat == category}">cat</option>
+        </select>
+        <label class="filter-check">
+            <input type="checkbox" name="remote" value="true" th:checked="${remote}"/> Remote only
+        </label>
+        <button type="submit" class="btn btn-primary">Filter</button>
+        <a th:href="@{/jobs}" class="btn btn-outline">Reset</a>
+    </form>
+
+    <!-- ── Results ─────────────────────────────────────────── -->
+    <div th:if="${jobs.isEmpty()}" class="empty-state">
+        <p>😕 No jobs found. Try a different search or <a th:href="@{/jobs}">reset filters</a>.</p>
+    </div>
+
+    <div class="job-list">
+        <a th:each="job : ${jobs}"
+           th:href="@{/jobs/{id}(id=${job.id})}"
+           class="job-row">
+            <!-- Logo -->
+            <div class="jr-logo">
+                <img th:if="${job.companyLogoUrl != null and !job.companyLogoUrl.isEmpty()}"
+                     th:src="${job.companyLogoUrl}" th:alt="${job.companyName}" class="company-logo"/>
+                <div th:unless="${job.companyLogoUrl != null and !job.companyLogoUrl.isEmpty()}"
+                     class="company-logo-placeholder"
+                     th:text="${job.companyName.substring(0,1)}">C</div>
+            </div>
+            <!-- Info -->
+            <div class="jr-info">
+                <span class="jr-title" th:text="${job.title}">Title</span>
+                <span class="jr-company" th:text="${job.companyName}">Company</span>
+            </div>
+            <!-- Meta -->
+            <div class="jr-meta">
+                <span class="tag tag-type" th:text="${job.jobType.label}">Full-time</span>
+                <span th:if="${job.remote}" class="tag tag-remote">🌍 Remote</span>
+                <span class="tag tag-cat" th:text="${job.category}">dev</span>
+            </div>
+            <!-- Salary -->
+            <div class="jr-salary" th:text="${job.salaryRange}">Salary</div>
+            <!-- Date -->
+            <div class="jr-date"
+                 th:text="${#temporals.format(job.postedAt, 'MMM d')}">Jan 1</div>
+        </a>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

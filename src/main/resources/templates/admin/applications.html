@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Applications Dashboard')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container page-container">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <div class="page-header">
+        <h1>📋 Applications <span class="count-badge" th:text="${applications.size()}">0</span></h1>
+    </div>
+
+    <!-- Filter by job -->
+    <form th:action="@{/admin/applications}" method="get" class="filter-bar">
+        <select name="jobId" class="filter-select">
+            <option value="">All jobs</option>
+            <option th:each="job : ${jobs}"
+                    th:value="${job.id}"
+                    th:text="${job.title} + ' @ ' + ${job.companyName}"
+                    th:selected="${job.id == selectedJobId}">Job</option>
+        </select>
+        <button type="submit" class="btn btn-primary">Filter</button>
+        <a th:href="@{/admin/applications}" class="btn btn-outline">Show All</a>
+    </form>
+
+    <div th:if="${applications.isEmpty()}" class="empty-state">
+        <p>No applications yet.</p>
+    </div>
+
+    <div class="app-table-wrap">
+        <table class="app-table" th:unless="${applications.isEmpty()}">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Applicant</th>
+                    <th>Email</th>
+                    <th>Position</th>
+                    <th>Company</th>
+                    <th>Applied</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="app : ${applications}">
+                    <td th:text="${app.id}">1</td>
+                    <td th:text="${app.applicantName}">Name</td>
+                    <td><a th:href="'mailto:' + ${app.email}" th:text="${app.email}">email</a></td>
+                    <td>
+                        <a th:href="@{/jobs/{id}(id=${app.jobListingId})}"
+                           th:text="${app.jobTitle}">Job</a>
+                    </td>
+                    <td th:text="${app.companyName}">Co</td>
+                    <td th:text="${#temporals.format(app.appliedAt, 'MMM d, yyyy')}">date</td>
+                    <td>
+                        <span th:text="${app.status.label}"
+                              th:classappend="'status-' + ${app.status.name().toLowerCase()}"
+                              class="app-status">status</span>
+                    </td>
+                    <td>
+                        <form th:action="@{/admin/applications/{id}/status(id=${app.id})}"
+                              method="post" class="inline-form">
+                            <select name="status" class="filter-select mini">
+                                <option th:each="s : ${T(com.devhunt.model.JobApplication.ApplicationStatus).values()}"
+                                        th:value="${s.name()}"
+                                        th:text="${s.label}"
+                                        th:selected="${s == app.status}">s</option>
+                            </select>
+                            <button type="submit" class="btn btn-outline btn-sm">Save</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

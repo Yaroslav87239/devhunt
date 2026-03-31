@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${job.title})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container page-container">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <a th:href="@{/jobs}" class="back-link">← Back to jobs</a>
+
+    <div class="detail-grid">
+
+        <!-- ── Left: Job info ──────────────────────────────── -->
+        <article class="detail-main">
+            <div class="detail-header">
+                <div class="company-logo-wrap lg">
+                    <img th:if="${job.companyLogoUrl != null and !job.companyLogoUrl.isEmpty()}"
+                         th:src="${job.companyLogoUrl}" th:alt="${job.companyName}" class="company-logo"/>
+                    <div th:unless="${job.companyLogoUrl != null and !job.companyLogoUrl.isEmpty()}"
+                         class="company-logo-placeholder lg"
+                         th:text="${job.companyName.substring(0,1)}">C</div>
+                </div>
+                <div>
+                    <h1 th:text="${job.title}">Job Title</h1>
+                    <p class="detail-company">
+                        <span th:text="${job.companyName}">Company</span>
+                        <span th:if="${job.companyLocation != null}"
+                              th:text="' · ' + ${job.companyLocation}"></span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="detail-tags">
+                <span class="tag tag-type" th:text="${job.jobType.label}">Type</span>
+                <span th:if="${job.remote}" class="tag tag-remote">🌍 Remote</span>
+                <span class="tag tag-cat" th:text="${job.category}">Cat</span>
+                <span class="tag tag-status"
+                      th:classappend="${job.status.name() == 'ACTIVE'} ? 'tag-active' : 'tag-closed'"
+                      th:text="${job.status}">Status</span>
+            </div>
+
+            <div class="detail-meta-row">
+                <span>💰 <strong th:text="${job.salaryRange}">Salary</strong></span>
+                <span>📅 Posted <strong th:text="${#temporals.format(job.postedAt, 'MMM d, yyyy')}">date</strong></span>
+                <span>👥 <strong th:text="${job.applicationCount}">0</strong> applicants</span>
+                <a th:if="${job.externalUrl != null}"
+                   th:href="${job.externalUrl}" target="_blank" class="btn btn-outline btn-sm">
+                    View Original ↗
+                </a>
+            </div>
+
+            <section class="detail-section">
+                <h2>About the Role</h2>
+                <p th:text="${job.description}">Description</p>
+            </section>
+
+            <section th:if="${job.requirements != null and !job.requirements.isEmpty()}"
+                     class="detail-section">
+                <h2>Requirements</h2>
+                <p th:text="${job.requirements}">Requirements</p>
+            </section>
+
+            <section th:if="${job.tags != null and !job.tags.isEmpty()}"
+                     class="detail-section">
+                <h2>Skills & Tags</h2>
+                <div class="pill-row">
+                    <span th:each="tag : ${#strings.arraySplit(job.tags, ',')}"
+                          th:text="${#strings.trim(tag)}"
+                          class="pill pill-skill">tag</span>
+                </div>
+            </section>
+
+            <!-- Admin status toggle -->
+            <section class="detail-section admin-section">
+                <h3>🛠 Admin</h3>
+                <form th:action="@{/admin/jobs/{id}/status(id=${job.id})}" method="post" class="inline-form">
+                    <select name="status" class="filter-select">
+                        <option th:each="s : ${T(com.devhunt.model.JobListing.JobStatus).values()}"
+                                th:value="${s}" th:text="${s}"
+                                th:selected="${s == job.status}">s</option>
+                    </select>
+                    <button type="submit" class="btn btn-outline btn-sm">Update Status</button>
+                </form>
+            </section>
+        </article>
+
+        <!-- ── Right: Apply form ───────────────────────────── -->
+        <aside class="detail-side">
+            <div class="apply-box" th:if="${job.status.name() == 'ACTIVE'}">
+                <h2>Apply for this role</h2>
+                <form th:action="@{/jobs/{id}/apply(id=${job.id})}" method="post"
+                      th:object="${applyForm}" class="apply-form">
+
+                    <input type="hidden" th:field="*{jobListingId}" />
+
+                    <div class="form-group">
+                        <label>Full Name *</label>
+                        <input type="text" th:field="*{applicantName}"
+                               placeholder="Jane Smith" required/>
+                        <span class="field-error" th:errors="*{applicantName}"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" th:field="*{email}"
+                               placeholder="jane@example.com" required/>
+                        <span class="field-error" th:errors="*{email}"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="tel" th:field="*{phone}" placeholder="+1 555 000 0000"/>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Resume URL</label>
+                        <input type="url" th:field="*{resumeUrl}"
+                               placeholder="https://linkedin.com/in/…"/>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Cover Letter</label>
+                        <textarea th:field="*{coverLetter}" rows="5"
+                                  placeholder="Tell us why you're a great fit…"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-full">Submit Application</button>
+                </form>
+            </div>
+
+            <div th:unless="${job.status.name() == 'ACTIVE'}" class="apply-box closed">
+                <p>⚠️ This position is no longer accepting applications.</p>
+            </div>
+
+            <!-- Applications list (admin view) -->
+            <div class="applications-box" th:if="${!applications.isEmpty()}">
+                <h3>Applications <span class="count-badge" th:text="${applications.size()}">0</span></h3>
+                <div th:each="app : ${applications}" class="app-item">
+                    <div class="app-name" th:text="${app.applicantName}">Name</div>
+                    <div class="app-email" th:text="${app.email}">email</div>
+                    <span th:text="${app.status}"
+                          th:classappend="'status-' + ${app.status.name().toLowerCase()}"
+                          class="app-status">status</span>
+                    <div class="app-date"
+                         th:text="${#temporals.format(app.appliedAt, 'MMM d')}">date</div>
+                </div>
+            </div>
+        </aside>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
