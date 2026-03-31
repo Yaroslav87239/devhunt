@@ -33,6 +33,7 @@ DevHunt is a Spring Boot web application that aggregates remote job listings and
 
 ## 📂 Project Structure
 
+```
 src/main/java/com/devhunt
 ├── config
 ├── controller
@@ -41,20 +42,29 @@ src/main/java/com/devhunt
 ├── repository
 ├── service
 
+```
 ---
 
 ## ⚙️ How to Run
 
 ### 1.Open project folder
+
+```
 cd devhunt
 
+```
+
 ### 2. Run the application
+
+```
 mvn spring-boot:run
+```
 
 ---
 
 ## 🌐 Access
 
+```
 Main app:  
 http://localhost:8080  
  
@@ -64,19 +74,21 @@ http://localhost:8080/h2-console
 JDBC URL: jdbc:h2:mem:devhuntdb  
 User: sa  
 Password: (empty)
+```
 
 ---
 
 ## 🔗 API Endpoints
 
+```
 GET /api/jobs  
 GET /api/applications  
-POST /jobs/{id}/apply  
+POST /jobs/{id}/apply
+```  
 
 ---
 
 ## 🧪 Example Workflow
-
 1. Open job list
 2. Select a job
 3. Submit application form
